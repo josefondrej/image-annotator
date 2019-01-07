@@ -1,31 +1,30 @@
 from annotator import Annotator
-from flask import Flask, render_template, request, jsonify
-import atexit
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
 annotator = Annotator()
 
 
-def emergency_save_db():
-    annotator._database._save_data()
-
-
 @app.route('/annotate', methods=["POST", "GET"])
 def annotate():
     if request.method == "POST":
-        x = request.form["x"]
-        y = request.form["y"]
-        annotator.annotate([x,y])
+        try:
+            x = request.form["x"]
+            y = request.form["y"]
+            image = request.form["img"]
+            image = image.split("/")[-1]
+            annotator.annotate(image, [x, y])
+        except Exception as e:
+            pass  # TODO: handle
 
-    next_picture = annotator.next_to_annotate()
+    next_image = annotator.next_to_annotate()
 
-    if not next_picture:
-        return "All pictures were annotated"
+    if not next_image:
+        return "All images were annotated"
     else:
-        return render_template("main.html", picture=next_picture)
+        return render_template("main.html", img=next_image)
 
 
 if __name__ == '__main__':
-    atexit.register(emergency_save_db)
     app.run(debug=True)

@@ -8,6 +8,7 @@ class Database(object):
         self._file_path = file_path
         self._ensure_initialization()
         self._data = self._load_data()
+        self._key = "_key"
 
     def _ensure_initialization(self):
         exists = os.path.isfile(self._file_path)
@@ -25,23 +26,23 @@ class Database(object):
         with open(self._file_path, "w") as f:
             json.dump(self._data, f)
 
-    def insert(self, object: object):
-        if not object["_key"]:
+    def insert(self, obj: object):
+        if not obj[self._key]:
             raise ValueError("Object in database has to have `_key` attribute")
 
-        self._data["data"].append(object)
+        self._data["data"].append(obj)
 
     def get(self, key: str) -> object:
         for obj in self._data["data"]:
-            if obj["_key"] == key:
-                return object
+            if obj[self._key] == key:
+                return obj
 
         return None
 
     def list_keys(self) -> List[str]:
         keys = []
         for obj in self._data["data"]:
-            keys.append(obj["_key"])
+            keys.append(obj[self._key])
 
         return keys
 
